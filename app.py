@@ -9,7 +9,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🍽️ FitBite Restaurant Assistant")
+st.title("🍽️ FitBite Virtual Waiter")
 
 # --- Assign random user per session ---
 if "user" not in st.session_state:
@@ -30,7 +30,10 @@ st.sidebar.write(f"**User ID:** {st.session_state.user_id}")
 st.sidebar.write(f"**Wallet Balance:** ₦{st.session_state.wallet_balance:,}")
 
 # --- Chat Display ---
-st.markdown("Type your message below to chat with the restaurant assistant:")
+st.markdown(
+    """Hi there, you are looking stunning!
+    What will you like from our restaurant today?"""
+)
 
 for chat in st.session_state.history:
     if chat["role"] == "user":
