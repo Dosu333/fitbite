@@ -26,7 +26,6 @@ if "history" not in st.session_state:
 user = st.session_state.user
 st.sidebar.header("👤 Current User")
 st.sidebar.write(f"**Name:** {user['name']}")
-st.sidebar.write(f"**User ID:** {st.session_state.user_id}")
 st.sidebar.write(f"**Wallet Balance:** ₦{st.session_state.wallet_balance:,}")
 
 # --- Chat Display ---
