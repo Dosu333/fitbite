@@ -1,8 +1,9 @@
 from google.genai import types
+import streamlit as st
 from db.user import USERS
 
 
-def make_payment(amount, user_id="user_001"):
+def make_payment(amount, user_id):
     """
     Process payment for a user by deducting the specified amount from
     their wallet balance.
@@ -20,18 +21,34 @@ def make_payment(amount, user_id="user_001"):
     """
     # Find the user by user_id
     user = next((user for user in USERS if user["id"] == user_id), None)
-
     if not user:
         return {"status": "failure", "message": "User not found"}
 
     # Check if the user has sufficient balance
-    if user["wallet_balance"] < amount:
-        return {"status": "failure", "message": "Insufficient funds"}
+    balance = (
+        st.session_state.wallet_balance
+        if "wallet_balance" in st.session_state and st.session_state.user_id == user_id
+        else user["wallet_balance"]
+    )
 
-    # Deduct the amount from the user's wallet balance
-    user["wallet_balance"] -= amount
+    if balance < amount:
+        return {
+            "status": "failure",
+            "message": f"Insufficient funds. Current balance: ₦{balance}",
+        }
 
-    return {"status": "success", "new_balance": user["wallet_balance"]}
+    # Deduct amount
+    new_balance = balance - amount
+    if "wallet_balance" in st.session_state and st.session_state.user_id == user_id:
+        st.session_state.wallet_balance = new_balance
+    else:
+        user["wallet_balance"] = new_balance
+
+    return {
+        "status": "success",
+        "message": f"Payment of ₦{amount} successful.",
+        "new_balance": new_balance,
+    }
 
 
 schema_make_payment = types.FunctionDeclaration(
@@ -43,11 +60,6 @@ schema_make_payment = types.FunctionDeclaration(
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
-            'user_id': types.Schema(
-                type=types.Type.STRING,
-                description="""The unique identifier of the
-                            user making the payment."""
-            ),
             'amount': types.Schema(
                 type=types.Type.NUMBER,
                 description="""The amount to be deducted from

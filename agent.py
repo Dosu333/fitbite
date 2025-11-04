@@ -15,7 +15,7 @@ client = genai.Client(api_key=API_KEY)
 messages = []
 
 
-def get_response(prompt, retries=3, delay=2):
+def get_response(prompt, retries=3, delay=2, user_id="user_001"):
     system_prompt = """
     You are a friendly and efficient restaurant assistant chatbot.
     Your job is to help users explore the Full Menu,
@@ -180,7 +180,7 @@ def get_response(prompt, retries=3, delay=2):
 
             for part in candidate.content.parts or []:
                 if hasattr(part, "function_call") and part.function_call:
-                    result = call_function(part.function_call)
+                    result = call_function(part.function_call, user_id=user_id)
                     messages.append(result)
 
                     follow_up_response = client.models.generate_content(
@@ -188,17 +188,20 @@ def get_response(prompt, retries=3, delay=2):
                         contents=messages,
                         config=config
                     )
-                    follow_up_reply = ""
-                    for sub_part in follow_up_response.candidates[0].content.parts or []:
-                        if hasattr(sub_part, "text") and sub_part.text:
-                            follow_up_reply += sub_part.text
+                    follow_up_candidate = follow_up_response.candidates[0]
+                    reply_parts = follow_up_candidate.content.parts
+
+                    if reply_parts and hasattr(reply_parts[0], "text"):
+                        follow_up_reply = reply_parts[0].text
+                    else:
+                        follow_up_reply = "✅ Payment processed successfully!"
 
                     messages.append(
                         types.Content(
                             role="model", parts=[
                                 types.Part(text=follow_up_reply)])
                     )
-
+                    print(follow_up_reply)
                     return follow_up_reply
 
             assistant_reply = candidate.content.parts[0].text

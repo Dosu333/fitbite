@@ -140,9 +140,9 @@ OTHER_SIDES = [
 ]
 
 FULL_MENU = {
-    "main_menu": MAIN_MENU,
+    "main menu": MAIN_MENU,
     "soups": SOUPS,
     "proteins": PROTEINS,
     "drinks": DRINKS,
-    "other_sides": OTHER_SIDES,
+    "sides": OTHER_SIDES,
 }
