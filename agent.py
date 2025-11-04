@@ -180,19 +180,31 @@ def get_response(prompt, retries=3, delay=2):
 
             for part in candidate.content.parts or []:
                 if hasattr(part, "function_call") and part.function_call:
-                    print("🔧 Function call detected:", part.function_call.name)
                     result = call_function(part.function_call)
                     messages.append(result)
+
                     follow_up_response = client.models.generate_content(
                         model="gemini-2.5-flash",
                         contents=messages,
                         config=config
                     )
-                    return follow_up_response.candidates[0].content
+                    follow_up_reply = ""
+                    for sub_part in follow_up_response.candidates[0].content.parts or []:
+                        if hasattr(sub_part, "text") and sub_part.text:
+                            follow_up_reply += sub_part.text
+
+                    messages.append(
+                        types.Content(
+                            role="model", parts=[
+                                types.Part(text=follow_up_reply)])
+                    )
+
+                    return follow_up_reply
+
             assistant_reply = candidate.content.parts[0].text
             messages.append(
                 types.Content(
-                    role="assistant", parts=[types.Part(text=assistant_reply)])
+                    role="model", parts=[types.Part(text=assistant_reply)])
             )
 
             return assistant_reply
