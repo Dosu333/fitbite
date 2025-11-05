@@ -12,7 +12,10 @@ def get_orders(user_id):
     """
     orders = st.session_state.get("orders", ORDERS)
     user_orders = [order for order in orders if order["user_id"] == user_id]
-    return user_orders
+    return {
+        "status": "success",
+        "orders": user_orders
+    }
 
 
 schema_get_orders = types.FunctionDeclaration(
