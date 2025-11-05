@@ -18,6 +18,11 @@ if "user" not in st.session_state:
     st.session_state.wallet_balance = st.session_state.user["wallet_balance"]
     st.session_state.history = []
 
+# --- Initialize cart and orders ---
+if "cart" not in st.session_state:
+    st.session_state.cart = []
+    st.session_state.orders = []
+
 # --- Initialize chat history ---
 if "history" not in st.session_state:
     st.session_state.history = []
