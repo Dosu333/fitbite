@@ -11,36 +11,51 @@ def add_to_cart(item_name, quantity, item_price):
         if item["name"] == item_name:
             item["quantity"] += quantity
             item["total_price"] = item["quantity"] * item_price
-            break
-    else:
-        cart.append({
-            "name": item_name,
-            "quantity": quantity,
-            "unit_price": item_price,
-            "total_price": quantity * item_price
-        })
-    return f"Added {quantity} x {item_name} to cart."
+            return {
+                "status": "success",
+                "message": f"""Updated {item_name} quantity to
+                            {item['quantity']} in cart."""
+            }
+
+    cart.append({
+        "name": item_name,
+        "quantity": quantity,
+        "unit_price": item_price,
+        "total_price": quantity * item_price
+    })
+    return {
+        "status": "success",
+        "message": f"Added {quantity} x {item_name} to cart."
+    }
 
 
 def view_cart():
     cart = st.session_state.get("cart", CART)
     if not cart:
-        return "Your cart is empty."
+        return {
+            "status": "success",
+            "cart": [],
+            "total_amount": 0,
+            'message': "Your cart is empty.",
+        }
 
-    cart_details = "Your Cart:\n"
     total_amount = 0
     for item in cart:
-        cart_details += f"""- {item['quantity']} x {item['name']} @
-                        ₦{item['unit_price']} each
-                        = ₦{item['total_price']}\n"""
         total_amount += item['total_price']
-    cart_details += f"\nTotal Amount: ₦{total_amount}"
-    return cart_details
+    return {
+        "status": "success",
+        "cart": cart,
+        "total_amount": total_amount,
+        "message": "Here are the items in your cart."
+    }
 
 
 def clear_cart():
     st.session_state["cart"] = []
-    return "Cart has been cleared."
+    return {
+        "status": "success",
+        "message": "Cleared all items from cart."
+    }
 
 
 def remove_from_cart(item_name):
@@ -48,8 +63,14 @@ def remove_from_cart(item_name):
     for item in cart:
         if item["name"] == item_name:
             cart.remove(item)
-            return f"Removed {item_name} from cart."
-    return f"{item_name} not found in cart."
+            return {
+                "status": "success",
+                "message": f"Removed {item_name} from cart."
+            }
+    return {
+        "status": "failure",
+        "message": f"{item_name} not found in cart."
+    }
 
 
 def edit_cart(item_name, new_quantity):
@@ -58,8 +79,14 @@ def edit_cart(item_name, new_quantity):
         if item["name"] == item_name:
             item["quantity"] = new_quantity
             item["total_price"] = new_quantity * item["unit_price"]
-            return f"Updated {item_name} quantity to {new_quantity}."
-    return f"{item_name} not found in cart."
+            return {
+                "status": "success",
+                "message": f"Updated {item_name} quantity to {new_quantity}."
+            }
+    return {
+        "status": "failure",
+        "message": f"{item_name} not found in cart."
+    }
 
 
 schema_add_to_cart = types.FunctionDeclaration(
